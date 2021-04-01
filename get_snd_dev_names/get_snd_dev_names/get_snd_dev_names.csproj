@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <TargetFramework>net5.0</TargetFramework>
+   </PropertyGroup>
+
+   <ItemGroup>
+     <PackageReference Include="ELFSharp" Version="2.12.0" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <None Update="audio.primary.msm8998.so">
+       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </None>
+   </ItemGroup>
+
+</Project>
