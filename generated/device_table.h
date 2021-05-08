@@ -1,4 +1,6 @@
-static char * device_table[SND_DEVICE_MAX] = {
+#include "snd_device_enum.h"
+
+static const char * const device_table[SND_DEVICE_MAX] = {
 	[SND_DEVICE_NONE] = "none",
 	[SND_DEVICE_OUT_HANDSET] = "handset",
 	[SND_DEVICE_OUT_SPEAKER] = "speaker",
@@ -16,6 +18,7 @@ static char * device_table[SND_DEVICE_MAX] = {
 	[SND_DEVICE_OUT_SPEAKER_AND_HEADPHONES_EXTERNAL_2] = "speaker-and-headphones-ext-2",
 	[SND_DEVICE_OUT_VOICE_HANDSET] = "voice-handset",
 	[SND_DEVICE_OUT_VOICE_SPEAKER] = "voice-speaker",
+	[17] = "voice-speaker-stereo", /* unknown SND_DEVICE_ */
 	[SND_DEVICE_OUT_VOICE_SPEAKER_VBAT] = "voice-speaker-vbat",
 	[SND_DEVICE_OUT_VOICE_SPEAKER_2] = "voice-speaker-2",
 	[SND_DEVICE_OUT_VOICE_SPEAKER_2_VBAT] = "voice-speaker-2-vbat",
@@ -58,8 +61,17 @@ static char * device_table[SND_DEVICE_MAX] = {
 	[SND_DEVICE_OUT_SPEAKER_PROTECTED_VBAT] = "speaker-protected-vbat",
 	[SND_DEVICE_OUT_VOICE_SPEAKER_PROTECTED_VBAT] = "voice-speaker-protected-vbat",
 	[SND_DEVICE_OUT_VOICE_SPEAKER_2_PROTECTED_VBAT] = "voice-speaker-2-protected-vbat",
+	/* no name for 60 */
+	/* no name for 61 */
+	/* no name for 62 */
 	[SND_DEVICE_OUT_SPEAKER_PROTECTED_RAS] = "speaker-protected",
 	[SND_DEVICE_OUT_SPEAKER_PROTECTED_VBAT_RAS] = "speaker-protected-vbat",
+	[65] = "voice-speaker-and-voice-headphones", /* unknown SND_DEVICE_ */
+	[66] = "voice-speaker-and-voice-anc-headphones", /* unknown SND_DEVICE_ */
+	[67] = "voice-speaker-and-voice-anc-fb-headphones", /* unknown SND_DEVICE_ */
+	[68] = "voice-speaker-stereo-and-voice-headphones", /* unknown SND_DEVICE_ */
+	[69] = "voice-speaker-stereo-and-voice-anc-headphones", /* unknown SND_DEVICE_ */
+	[70] = "voice-speaker-stereo-and-voice-anc-fb-headphones", /* unknown SND_DEVICE_ */
 	[SND_DEVICE_OUT_HEADPHONES_VOIP] = "headphones",
 	[SND_DEVICE_OUT_HI_HEADPHONES_VOIP] = "headphones",
 	[SND_DEVICE_OUT_HI_HEADPHONES] = "headphones",
@@ -159,6 +171,10 @@ static char * device_table[SND_DEVICE_MAX] = {
 	[SND_DEVICE_IN_UNPROCESSED_THREE_MIC] = "unprocessed-three-mic",
 	[SND_DEVICE_IN_UNPROCESSED_QUAD_MIC] = "unprocessed-quad-mic",
 	[SND_DEVICE_IN_UNPROCESSED_HEADSET_MIC] = "unprocessed-headset-mic",
+	/* no name for 170 */
+	/* no name for 171 */
+	/* no name for 172 */
+	/* no name for 173 */
 	[SND_DEVICE_IN_HANDSET_GENERIC_QMIC] = "quad-mic",
 	[SND_DEVICE_IN_HANDSET_VOIP_DMIC] = "dmic-endfire",
 	[SND_DEVICE_IN_HEADSET_VOIP_MIC] = "headset-mic",

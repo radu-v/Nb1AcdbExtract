@@ -1,4 +1,6 @@
-static int acdb_device_table[SND_DEVICE_MAX] = {
+#include "snd_device_enum.h"
+
+static const int acdb_device_table[SND_DEVICE_MAX] = {
 	[SND_DEVICE_NONE] = -1,
 	[SND_DEVICE_OUT_HANDSET] = 7,
 	[SND_DEVICE_OUT_SPEAKER] = 14,
