@@ -19,7 +19,7 @@ namespace get_snd_dev_names
       static readonly (ulong offset, int size) acdb_device_table = (0x90420, 720);
       static readonly (ulong offset, int size) pcm_device_table = (0x906f0, 504);
       static readonly (ulong offset, int size) snd_device_name_index = (0x908e8, 18616);
-      static readonly (ulong offset, int size) usecase_name_index = (0x95208, 6552);
+      static readonly (ulong offset, int size) usecase_name_index = (0x95208, 0);
 
       static void Main(string[] args)
       {
@@ -40,7 +40,7 @@ namespace get_snd_dev_names
       {
          var section = GetSectionByAddress(elf, usecase_name_index.offset);
          var offsetDelta = (int) (usecase_name_index.offset - section.LoadAddress);
-         var data = section.GetContents().AsSpan().Slice(offsetDelta, 6552);
+         var data = section.GetContents().AsSpan()[offsetDelta..];
 
          using var file = new StreamWriter("usecase_name_index.h");
          file.WriteLine("#include \"usecase_enum.h\"\n");
@@ -48,11 +48,11 @@ namespace get_snd_dev_names
 
          var usecaseNames = new Dictionary<string, int>();
 
-         for (var row = 0; row < 63; row++)
+         for (var row = 0;; row++)
          {
             var nameSlice = data.Slice(row * 104, 100);
             var name = ToAsciiZ(nameSlice);
-            if (string.IsNullOrEmpty(name)) continue;
+            if (string.IsNullOrEmpty(name)) break;
 
             var index = BitConverter.ToInt32(data.Slice(row * 104 + 100, 4).ToArray());
             file.WriteLine($"\t{{TO_NAME_INDEX({name})}}, /* {{\"{name}\", {index}}} */");
@@ -129,8 +129,8 @@ namespace get_snd_dev_names
 
          for (var i = 0; i < 63; i++)
          {
-            var dev1 = BitConverter.ToInt32(data.Slice(i * 4, 4).ToArray());
-            var dev2 = BitConverter.ToInt32(data.Slice(i * 4 + 4, 4).ToArray());
+            var dev1 = BitConverter.ToInt32(data.Slice(i * 8, 4).ToArray());
+            var dev2 = BitConverter.ToInt32(data.Slice(i * 8 + 4, 4).ToArray());
 
             file.WriteLine(usecaseNames.TryGetValue(i, out var usecase)
                ? $"\t[{usecase}] = {{{dev1}, {dev2}}},"
@@ -197,7 +197,7 @@ namespace get_snd_dev_names
          file.WriteLine("};");
       }
 
-      static void ExtractDeviceTable(IELF elf, Dictionary<int, string> sndDevices)
+      static void ExtractDeviceTable(IELF elf, IReadOnlyDictionary<int, string> sndDevices)
       {
          var section = GetSectionByAddress(elf, device_table.offset);
          var offsetDelta = (int) (device_table.offset - section.LoadAddress);
