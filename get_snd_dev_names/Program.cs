@@ -20,12 +20,11 @@ namespace get_snd_dev_names
       static readonly (ulong offset, int size) pcm_device_table = (0x906f0, 504);
       static readonly (ulong offset, int size) snd_device_name_index = (0x908e8, 18616);
       static readonly (ulong offset, int size) usecase_name_index = (0x95208, 0);
+      static readonly (ulong offset, int size) effect_config_table = (0x96ba0, 4512);
 
       static void Main(string[] args)
       {
          var elf = ELFReader.Load(HalPath);
-
-         Section<ulong> section;
 
          var sndDevices = ExtractSndDeviceNameIndex(elf);
          var usecaseNames = ExtractUsecaseNameIndex(elf);
@@ -34,6 +33,7 @@ namespace get_snd_dev_names
          ExtractDspOnlyDecodersMime(elf);
          ExtractAcdbDeviceTable(elf, sndDevices);
          ExtractPcmDeviceTable(elf, usecaseNames);
+         ExtractEffectConfigTable(elf, sndDevices);
       }
 
       static Dictionary<int, string> ExtractUsecaseNameIndex(IELF elf)
@@ -115,6 +115,36 @@ namespace get_snd_dev_names
          sndDevicesEnum.WriteLine("};");
 
          return deviceNames.OrderBy(k => k.Value).ToDictionary(k => k.Value, v => v.Key);
+      }
+
+      static void ExtractEffectConfigTable(IELF elf, IReadOnlyDictionary<int, string> sndDevices)
+      {
+         var section = GetSectionByAddress(elf, effect_config_table.offset);
+         var offsetDelta = (int) (effect_config_table.offset - section.LoadAddress);
+         var data = section.GetContents().AsSpan().Slice(offsetDelta, effect_config_table.size);
+
+         using var file = new StreamWriter("effect_config_table.h");
+         file.WriteLine("#include \"snd_device_enum.h\"\n");
+         file.WriteLine(@"static struct audio_effect_config effect_config_table[GET_IN_DEVICE_INDEX(SND_DEVICE_MAX)][3] = {");
+
+         for (var row = 0; row < 94; row++) /* 94 = SND_DEVICE_MAX - SND_DEVICE_IN_BEGIN*/
+         {
+            for (var effect = 0; effect < 3; effect++)
+            {
+               var effectSlice = data.Slice(row * 48 + effect * 16, 16);
+               var moduleId = BitConverter.ToInt32(effectSlice[0..4].ToArray());
+               var instanceId = BitConverter.ToInt32(effectSlice[4..8].ToArray());
+               var paramId = BitConverter.ToInt32(effectSlice[8..12].ToArray());
+               var paramValue = BitConverter.ToInt32(effectSlice[12..16].ToArray());
+
+               if (paramId == 0 || !sndDevices.TryGetValue(row + 86, out var sndDeviceName))
+                  continue;
+
+               file.WriteLine($"\t[GET_IN_DEVICE_INDEX({sndDeviceName})][{effect}] = {{{moduleId}, 0x{instanceId:x4}, 0x{paramId:x4}, 0x{paramValue:x4}}},");
+            }
+         }
+
+         file.WriteLine("};");
       }
 
       static void ExtractPcmDeviceTable(IELF elf, IReadOnlyDictionary<int, string> usecaseNames)
